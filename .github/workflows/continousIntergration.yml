@@ -9,17 +9,17 @@ on:
     branches: [ master ]
 
 jobs:
-  setupDatabase:
-   runs-on: [ubuntu-latest]
-   strategy:
-     matrix:
-       mongodb-version: [4.0, 4.2]
-   steps:
-     - uses: supercharge/mongodb-github-action@1.2.0
-       name: Mongodb
-       with:
-         mongodb-version: ${{ matrix.mongodb-version }}
-         mongodb-replica-set: testDb
+  # setupDatabase:
+  #  runs-on: [ubuntu-latest]
+  #  strategy:
+  #    matrix:
+  #      mongodb-version: [4.0, 4.2]
+  #  steps:
+  #    - uses: supercharge/mongodb-github-action@1.2.0
+  #      name: Mongodb
+  #      with:
+  #        mongodb-version: ${{ matrix.mongodb-version }}
+  #        mongodb-replica-set: testDb
   build:
     runs-on: ubuntu-latest
     strategy:
