@@ -22,6 +22,11 @@ jobs:
          mongodb-replica-set: testDb
   build:
     runs-on: ubuntu-latest
+    services:
+      mongoDb:
+        image: mongo
+        ports: 
+          - 27017:27017
     strategy:
       matrix:
         node-version: [ 12.x]
