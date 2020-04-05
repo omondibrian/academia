@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x,13.x]
+        node-version: [ 12.x]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -37,4 +37,6 @@ jobs:
     - run: npm run test:cov
       env:
         CI: true
+        MONGODB_URL: ${{secrets.MONGODB_URL}} 
+        APP_SECREATE: ${{secrets.APP_SECREATE}} 
     needs: [setupDatabase]
