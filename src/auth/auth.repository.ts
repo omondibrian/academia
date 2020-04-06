@@ -1,27 +1,20 @@
 import { IAuthRepository } from './interface/auth.interface';
-import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { UserDTO } from 'src/shared/userDTO';
 import { AuthDataService } from './auth_data.service';
 
-
 @Injectable()
 export class AuthRepository implements IAuthRepository {
-  constructor(
-    private dataService: AuthDataService,
-    
-  ) {}
- 
+  constructor(private dataService: AuthDataService) {}
+
+  APP_SECRET = process.env.APP_SECRET || 'hdgfkfkfgk';
   /**
    * @description  used to register users in the db
    * @param {*} args
    */
-//   @UsePipes(new JoiValidationPipe(this.Regschema))
+  //   @UsePipes(new JoiValidationPipe(this.Regschema))
   async registerUser(args: UserDTO) {
     const { password, mobileNumber } = args;
 
@@ -32,21 +25,38 @@ export class AuthRepository implements IAuthRepository {
     }
     const encrptedPass = await bcrypt.hash(password, 10);
 
-    const APP_SECRET = process.env.APP_SECRET || 'hdgfkfkfgk';
     const newUser = await this.dataService.saveUser({
       ...args,
       password: encrptedPass,
     });
-    const token = jwt.sign({ userId: newUser.id }, APP_SECRET);
+    const token = await this.signPayload({ id: newUser.id });
 
     return {
       token,
       user: newUser,
     };
   }
-
-  loginUser(user: any) {
-    throw new Error('Method not implemented.');
+  private async signPayload(payload: { id: string }) {
+    return jwt.sign(payload, this.APP_SECRET, {
+      expiresIn: '7d',
+    });
+  }
+  async validatejwt(payload: { id: string }) {
+    const { id } = payload;
+    return await this.dataService.getUser({ id });
+  }
+  async loginUser(user: { name: string; password: string }) {
+    const { name, password } = user;
+    const userToLogIn = await this.dataService.getUser({ name });
+    const validPass = await bcrypt.compare(password, userToLogIn.password);
+    if (!validPass)
+      throw new HttpException(
+        'Error authenticating please try again',
+        HttpStatus.UNAUTHORIZED,
+      );
+    const payload = { id: userToLogIn.id };
+    const token = await this.signPayload(payload);
+    return { user: userToLogIn, token };
   }
   updateUserProfile(userId: string, payload: any) {
     throw new Error('Method not implemented.');

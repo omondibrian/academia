@@ -13,9 +13,10 @@ export class AuthDataService implements IRepository {
   async getUser(args: {
     id?: string;
     mobileNumber?: number;
+    name?: string;
   }): Promise<UserDTO> {
     try {
-      const result = await this.UserModel.findOne(args);
+      const result = await this.UserModel.findOne(args).exec();
       // if (!result) throw new Error();
       return result;
     } catch (error) {
