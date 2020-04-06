@@ -42,9 +42,10 @@ describe('AuthDataService', () => {
 
   describe('getUser ', () => {
     it('should should fetch the user data', async () => {
-
       //act
-      const result = await service.getUser({ mobileNumber:Tuser.mobileNumber});
+      const result = await service.getUser({
+        mobileNumber: Tuser.mobileNumber,
+      });
       //assert
       expect(result.id).toBeTruthy();
       const { name, email, profileImage, mobileNumber, role } = result;

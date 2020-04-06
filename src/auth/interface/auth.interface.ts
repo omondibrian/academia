@@ -1,17 +1,20 @@
-import { UserDTO } from "src/shared/userDTO";
+import { UserDTO } from 'src/shared/userDTO';
 
 export interface IAuthRepository {
   /**
    * @description used to register new users by passing thier details as the payload
    * @param user
    */
-  registerUser(user: UserDTO):Promise<{token: string;user: any;}>;
+  registerUser(user: UserDTO): Promise<{ token: string; user: any }>;
 
   /**
    * @description used to authenticate uusers
    * @param user
    */
-  loginUser(user: any);
+  loginUser(user: {
+    readonly name: string;
+    readonly password: string;
+  }): Promise<{ user: UserDTO; token: string }>;
 
   /**
    * @description updates user profile

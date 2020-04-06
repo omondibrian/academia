@@ -1,6 +1,4 @@
-
-
-import { connect,connection } from "mongoose";
+import { connect, connection } from 'mongoose';
 
 const MONGODB_URL = process.env.MONGO_URL || 'mongodb://localhost/testDb';
 

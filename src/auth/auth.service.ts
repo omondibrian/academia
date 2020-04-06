@@ -14,13 +14,18 @@ export class AuthService {
       email: string;
       profileImage: string;
     };
-    token:string
+    token: string;
   }> {
     try {
-      const {user,token} = await this.authRepository.registerUser(newUser);
+      const { user, token } = await this.authRepository.registerUser(newUser);
       return {
-        user: { name:user.name, id:user.id, email:user.email,profileImage:user.profileImage },
-        token
+        user: {
+          name: user.name,
+          id: user.id,
+          email: user.email,
+          profileImage: user.profileImage,
+        },
+        token,
       };
     } catch (error) {
       throw new HttpException(
@@ -28,5 +33,12 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+  async login(payload: { name: string; password: string }) {
+    return this.authRepository.loginUser(payload);
+  }
+
+  async validateJwtPayload(payload: { id: string }) {
+    return await this.authRepository.validatejwt(payload);
   }
 }
