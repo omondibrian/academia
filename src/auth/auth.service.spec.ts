@@ -65,4 +65,19 @@ describe('AuthService', () => {
       expect(result.token).toBeTruthy();
     });
   });
+
+  describe('deleteAccount', () => {
+    it('should call delete user account passing in the right params', async () => {
+      //arrange
+      jest.spyOn(mockAuthRepository, 'deleteUserAccount');
+      //act
+      const isTrue = await service.deleteAccount({ email: newUser.email });
+      //assert
+      expect(isTrue).toBeTruthy();
+      expect(mockAuthRepository.deleteUserAccount).toHaveBeenCalled();
+      expect(mockAuthRepository.deleteUserAccount).toHaveBeenCalledWith({
+        email: newUser.email,
+      });
+    });
+  });
 });

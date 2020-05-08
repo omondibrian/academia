@@ -71,8 +71,89 @@ describe('AuthRepository', () => {
         ),
       );
     });
-    // it('should call the register validation',()=>{
-    //   expect(registrationValidation).
+  });
+
+  describe('validatejwt', () => {
+    it('should call get user data service passing in the right parameters', async () => {
+      jest.spyOn(service, 'getUser');
+      await repo.validatejwt({ email: TRepuser2.email });
+      expect(service.getUser).toHaveBeenCalled();
+      expect(service.getUser).toHaveBeenCalledWith({ email: TRepuser2.email });
+    });
+  });
+  describe('updateUserProfile', () => {
+    it("should successfully update user's password", async () => {
+      const result = await repo.updateUserProfile(
+        { email: TRepuser2.email },
+        { password: 'testingupdatepass' },
+      );
+      expect(result.password).toBeDefined();
+    });
+    it("should successfully update user's image", async () => {
+      const result = await repo.updateUserProfile(
+        { email: TRepuser2.email },
+        { file: 'updateimagepath' },
+      );
+      console.log(result);
+      expect(result.profileImage).toBeTruthy();
+    });
+    // it("should throw an error when updating user's profile is not successful", async () => {
+    //   jest.spyOn(service, 'updateUser').mockImplementation(() => {
+    //     throw new Error();
+    //   });
+    //   expect(
+    //     repo.updateUserProfile(
+    //       { email: TRepuser2.email },
+    //       { password: TRepuser2.password },
+    //     ),
+    //   ).rejects.toThrowError(
+    //     new HttpException(
+    //       'Error while updating profile',
+    //       HttpStatus.INTERNAL_SERVER_ERROR,
+    //     ),
+    //   );
+    // });
+  });
+
+  describe('forgotpass', () => {
+    it('should automatically reset your password returning the new password', async () => {
+      //act
+      const result = await repo.forgotpass(TRepuser2.email);
+      //assert
+      expect(result.secreateToken).toBeDefined();
+    });
+    // it('should throw an error when reseting user\'s password is not successful',async ()=>{
+    //   jest.spyOn(service,'updateUser').mockImplementation(()=>{
+    //     throw new Error()
+    //   })
+    //   expect(repo.forgotpass(TRepuser2.email)).rejects.toThrowError(
+    //     new HttpException(
+    //       'Error while updating profile',
+    //       HttpStatus.INTERNAL_SERVER_ERROR,
+    //     ),
+    //   );
     // })
+  });
+
+  describe('deleteUserAccount', () => {
+    it('should successfully delete users account', async () => {
+      const result = await repo.deleteUserAccount({ email: TRepuser2.email });
+
+      console.log(result);
+      expect(result).toBeTruthy();
+    });
+    it('should throw an error when deleting user account is not successful', async () => {
+      jest.spyOn(service, 'deleteUserAccount').mockImplementation(() => {
+        throw new Error();
+      });
+      expect(
+        repo.deleteUserAccount({ email: TRepuser2.email }),
+      ).rejects.toThrowError(
+        new HttpException(
+          'Error while deleting account',
+          HttpStatus.NON_AUTHORITATIVE_INFORMATION,
+        ),
+      );
+    });
   });
 });

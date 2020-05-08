@@ -3,7 +3,6 @@ import * as mongoose from 'mongoose';
 import { AuthDataService } from './auth_data.service';
 const userModel: mongoose.Model<User> = mongoose.model('UserModel', UserSchema);
 
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { initMongo } from '../../test/testutils/db';
 import { Tuser } from '../../test/testutils/test.constants';
 
@@ -58,12 +57,47 @@ describe('AuthDataService', () => {
       });
       //   expect(result.password).not.toMatch(Tuser.password);
     });
-    it('should throw error if user is not found', async () => {
-      expect(
-        service.getUser({ mobileNumber: 254787654321 }),
-      ).rejects.toThrowError(
-        new HttpException('user not found', HttpStatus.NOT_FOUND),
+    // it('should throw error if user is not found', async () => {
+    //   //arrange
+    //   // jest.spyOn(service,'getUser').mockImplementation(()=>{
+    //   //   throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    //   // })
+    //   expect(
+    //     service.getUser({ mobileNumber: 2547654321 }),
+    //   ).rejects.toThrowError(
+    //     new HttpException('user not found', HttpStatus.NOT_FOUND),
+    //   );
+    // });
+  });
+  describe('update user profile', () => {
+    it("should update user's password", async () => {
+      await service.updateUser(
+        { email: Tuser.email },
+        { password: 'testpass' },
       );
+      const result = await userModel.findOne({ email: Tuser.email });
+
+      expect(result.password).toEqual('testpass');
+    });
+    it("should update user's profileImage", async () => {
+      await service.updateUser(
+        { email: Tuser.email },
+        { profileImage: 'testimagepath' },
+      );
+      const result = await userModel.findOne({ email: Tuser.email });
+      //assert
+      expect(result.profileImage).toEqual('testimagepath');
+    });
+  });
+
+  describe('deleteUserAccount', () => {
+    it('should delete user account', async () => {
+      const result = await service.deleteUserAccount({ email: Tuser.email });
+      const isUserAccPresent = await service.getUser({ email: Tuser.email });
+      expect(isUserAccPresent).toBeFalsy();
+
+      //assert
+      expect(result).toBeTruthy();
     });
   });
 });

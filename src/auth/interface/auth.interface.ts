@@ -21,21 +21,21 @@ export interface IAuthRepository {
    * @param userId for identification
    * @param payload profile to be updated
    */
-  updateUserProfile(userId: string, payload: any);
+  updateUserProfile(args: { userId?: string; email?: string }, payload: any);
 
   /**
    * @description removes a user account parmanetly from the system
    * @param userId to be removed
    * @returns true if successfull false otherwise
    */
-  deleteUserAccount(userId: string): boolean;
+  deleteUserAccount(args: { userId: string; email?: string }): Promise<boolean>;
 
-  /**
-   * @description used to reset user password
-   * @param userId to update password
-   * @param newPass new password
-   */
-  resetPass(userId: string, newPass: string): boolean;
+  // /**
+  //  * @description used to reset user password
+  //  * @param userId to update password
+  //  * @param newPass new password
+  //  */
+  // resetPass(userId: string, newPass: string): boolean;
 
   /**
    * @description used for password recovery

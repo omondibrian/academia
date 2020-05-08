@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { User, UserDTO } from 'src/shared/userDTO';
@@ -14,25 +14,26 @@ export class AuthDataService implements IRepository {
     id?: string;
     mobileNumber?: number;
     name?: string;
+    email?: string;
   }): Promise<UserDTO> {
-    try {
-      const result = await this.UserModel.findOne(args).exec();
-      // if (!result) throw new Error();
-      return result;
-    } catch (error) {
-      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
-    }
+    return await this.UserModel.findOne({ ...args }).exec();
   }
 
   async saveUser(user: UserDTO): Promise<UserDTO> {
-    try {
-      const User = new this.UserModel(user);
-      return await User.save();
-    } catch (error) {
-      throw new HttpException(
-        'sorry ,,Unable to save user data at the moment try again',
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    const User = new this.UserModel(user);
+    return await User.save();
+  }
+
+  async updateUser(
+    updateBy: { id?: string; email?: string; name?: string },
+    args: { password?: string; profileImage?: string },
+  ) {
+    await this.UserModel.updateOne(
+      { ...updateBy },
+      { $set: { ...args } },
+    ).exec();
+  }
+  async deleteUserAccount(args: { id?: string; email?: string }) {
+    return await this.UserModel.findOneAndDelete({ ...args }).exec();
   }
 }

@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { UserDTO } from 'src/shared/userDTO';
 import { AuthDataService } from './auth_data.service';
+import { generate } from 'randomstring';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
@@ -41,9 +42,8 @@ export class AuthRepository implements IAuthRepository {
       expiresIn: '7d',
     });
   }
-  async validatejwt(payload: { id: string }) {
-    const { id } = payload;
-    return await this.dataService.getUser({ id });
+  async validatejwt(payload: { id?: string; email?: string }) {
+    return await this.dataService.getUser({ ...payload });
   }
   async loginUser(user: { name: string; password: string }) {
     const { name, password } = user;
@@ -58,17 +58,78 @@ export class AuthRepository implements IAuthRepository {
     const token = await this.signPayload(payload);
     return { user: userToLogIn, token };
   }
-  updateUserProfile(userId: string, payload: any) {
-    throw new Error('Method not implemented.');
+
+  async updateUserProfile(
+    args: { userId?: string; email?: string },
+    payload: { password?: string; file?: string },
+  ) {
+    try {
+      if (payload.password) {
+        //encrpte the password
+        const encrptedPass = await bcrypt.hash(payload.password, 10);
+        await this.dataService.updateUser(
+          { ...args },
+          { password: encrptedPass },
+        );
+      }
+      if (payload.file) {
+        const name = Date.now() + ' ' + payload.file;
+        const image = `/uploads/${encodeURIComponent(name)}`;
+        await this.dataService.updateUser({ ...args }, { profileImage: image });
+      }
+
+      return await this.dataService.getUser({ ...args });
+    } catch (error) {
+      throw new HttpException(
+        'Error while updating profile',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
-  deleteUserAccount(userId: string): boolean {
-    throw new Error('Method not implemented.');
+  async deleteUserAccount(args: { id?: string; email?: string }) {
+    let user: UserDTO;
+    try {
+      user = await this.dataService.deleteUserAccount({ ...args });
+    } catch (error) {
+      throw new HttpException(
+        'Error while deleting account',
+        HttpStatus.NON_AUTHORITATIVE_INFORMATION,
+      );
+    }
+
+    if (user) return new Promise(res => res(true)) as Promise<boolean>;
   }
-  resetPass(userId: string, newPass: string): boolean {
-    throw new Error('Method not implemented.');
-  }
-  forgotpass(email: string) {
-    throw new Error('Method not implemented.');
+
+  async forgotpass(email: string) {
+    try {
+      const secreateToken = generate(7);
+      //encrpte the password
+      const salt = await bcrypt.genSalt(10);
+      const encrptedPass = await bcrypt.hash(secreateToken, salt);
+      await this.dataService.updateUser(
+        { email: email },
+        { password: encrptedPass },
+      );
+      //compose an email
+      // const html = `
+      //     Hello ${user.name},<br/>
+      //     please enter the verification code below to acess your account
+      //     please enter the following token<br/>
+      //     Token:${secreateToken}<br/>
+      //     Have a nice day.
+      //     `;
+      //send the email
+      //  await sendemail(process.env.User,req.body.email,'Password Reset Request',html)
+      return {
+        message: 'password changed successfully please check your email',
+        secreateToken,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Error while updating profile',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
 export default AuthRepository;

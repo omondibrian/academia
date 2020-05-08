@@ -3,3 +3,4 @@ config/config.env
 .vscode
 .env
 dist
+coverage
